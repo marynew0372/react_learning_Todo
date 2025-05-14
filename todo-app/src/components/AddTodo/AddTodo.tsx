@@ -2,9 +2,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import TextField from './TextField';
 import TaskAddButton from './Button';
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import styled from 'styled-components';
-
 const AlertWrapper = styled.div`
     margin-bottom: 10px;
 `
@@ -15,12 +15,12 @@ interface AddTodoProps {
 
 const AddTodo: React.FC<AddTodoProps> = ({onAddTask}) => {
     const [task, setTask] = useState('');
-    const [error, setError] = useState(false);
+    const [emptyFieldError, setEmptyFieldError] = useState(false);
 
     //записываем значение в task
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTask(event.target.value);
-        setError(false);
+        setEmptyFieldError(false);
     }
 
     //при нажатии кнопки передаем значение task родителю App для записи в массив tasks
@@ -29,14 +29,35 @@ const AddTodo: React.FC<AddTodoProps> = ({onAddTask}) => {
             onAddTask(task);
             setTask('')
         } else {
-            setError(true);
+            setEmptyFieldError(true);
         }
     }
+
+    const handleClose = (
+    _event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+    ) => {
+    if (reason === 'clickaway') {
+      return;
+    };
+    setEmptyFieldError(false);
+    };
 
     return (
         <>
             <AlertWrapper>
-                {error && <Alert severity='error'>Не задано имя задачи</Alert>}
+                {emptyFieldError && 
+                    <Snackbar open={emptyFieldError} autoHideDuration={2000} onClose={handleClose}>
+                        <Alert
+                        onClose={handleClose}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: '100%' }}
+                        >
+                        Не заполнено имя задачи
+                        </Alert>
+                    </Snackbar>
+                }
             </AlertWrapper>
             <div className='add-todo'>
                 <TextField value={task} onChange={handleInputChange}></TextField>

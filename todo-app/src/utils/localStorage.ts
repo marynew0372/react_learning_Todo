@@ -1,28 +1,28 @@
-const TASK_KEY = 'tasks';
+// const TASK_KEY = 'tasks';
 
-interface Task {
-    text: string;
-    date: Date;
-    checkbox: boolean;
-}
+// interface Task {
+//     text: string;
+//     date: Date;
+//     checkbox: boolean;
+// }
 
 export enum ThemeModeEnum {
     darkTheme = 'dark',
     lightTheme = 'light'
 }
 
-export const saveTasksToLocalStorage = (tasks: Task[]) => {
-    localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
-};
+// export const saveTasksToLocalStorage = (tasks: Task[]) => {
+//     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+// };
 
-export const loadTasksFromLocalStorage = (): Task[] => {
-    const storedTasks = localStorage.getItem(TASK_KEY);
-    return storedTasks ? JSON.parse(storedTasks) : [];
-};
+// export const loadTasksFromLocalStorage = (): Task[] => {
+//     const storedTasks = localStorage.getItem(TASK_KEY);
+//     return storedTasks ? JSON.parse(storedTasks) : [];
+// };
 
-export const clearTasksFromLocalStorage = () => {
-    localStorage.removeItem(TASK_KEY);
-};
+// export const clearTasksFromLocalStorage = () => {
+//     localStorage.removeItem(TASK_KEY);
+// };
 
 export const saveThemeToLocalStorage = (theme: 'light' | 'dark') => {
     localStorage.setItem('Theme', theme);

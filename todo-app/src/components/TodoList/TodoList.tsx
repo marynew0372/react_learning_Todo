@@ -7,27 +7,33 @@ import ListItemText from '@mui/material/ListItemText';
 import Checkbox from '@mui/material/Checkbox';
 import IconButton from '@mui/material/IconButton';
 import { blue } from '@mui/material/colors';
+import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import EditTodo from '../EditTodo/EditTodo';
-import { TaskDate } from '../../App';
 import { ListContainer, ButtonSort } from './TodoList.styles';
 import { EditIconCustom, DeleteIconCustom, SwapVertIconCustom } from './TodoList.styles';
-import { saveTasksToLocalStorage } from '../../utils/localStorage';
+import { useDispatch, useSelector } from 'react-redux';
+import { setTasks, updateTask } from '../../../store/tasksSlice';
+import { RootState } from '../../../store/store';
+import { toggleTask } from '../../api/todos';
 import './styles.css'
 
 
-
 interface TodoListProps {
-    tasks: TaskDate[];
-    setTasks: React.Dispatch<React.SetStateAction<TaskDate[]>>;
     onDelete: (index: number) => void;
     onEdit: (index: number, task: string) => void;
 }
 
-const TodoList: React.FC<TodoListProps> = ({tasks, setTasks, onDelete, onEdit}) => {
+const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [currentTask, setCurrentTask] = useState<string>('');
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [ascending, setAscending] = useState(true);
+    const [msgStateCompleted, setMsgStateCompleted] = useState<boolean>(false);
+    const [msgStateEdit, setMsgStateEdit] = useState<boolean>(false);
+
+    const dispatch = useDispatch();
+    const tasks = useSelector((state: RootState) => state.tasks.tasks);
 
     const handleDialogOpen = (task: string, index: number) => {
         setCurrentTask(task);
@@ -43,33 +49,71 @@ const TodoList: React.FC<TodoListProps> = ({tasks, setTasks, onDelete, onEdit}) 
 
     const handleSaveTask = (newTask: string) => {
         if (currentIndex !== null) {
-            onEdit(currentIndex, newTask)
+            onEdit(currentIndex, newTask);
+            setMsgStateEdit(true);
         }
     }
 
     const handleSortToggle = () => {
-        setAscending(!ascending); // Переключаем значение ascending
-        sortTasksByDate(!ascending); // Передаем новое значение в функцию сортировки
+        setAscending(!ascending);
+        sortTasksByDate(!ascending);
     };
 
     const sortTasksByDate = (ascending: boolean = true) => {
         const sortedTasks = [...tasks].sort((a, b) => {
             return ascending
-                ? new Date(a.date).getTime() - new Date(b.date).getTime()
-                : new Date(b.date).getTime() - new Date(a.date).getTime();
+                ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                : new Date(b.createdAt).getTime() - new Date (a.createdAt).getTime();
         });
-        setTasks(sortedTasks);
+        dispatch(setTasks(sortedTasks));
     };
 
-    const handleToggleCheckbox = (index: number) => {
-        const updatedTasks = [...tasks];
-        updatedTasks[index].checkbox = !updatedTasks[index].checkbox;
-        setTasks(updatedTasks);
-        saveTasksToLocalStorage(updatedTasks);
+    const handleToggleCheckbox = async (id: number) => {
+        const updatedTask = await toggleTask(id);
+        const task = tasks.find(t => t.id === id);
+        if (task && task.completed === false) {
+            setMsgStateCompleted(true);
+        }
+        dispatch(updateTask(updatedTask));
     }
+
+    const handleClose = (
+    _event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason,
+    ) => {
+    if (reason === 'clickaway') {
+      return;
+    };
+    setMsgStateCompleted(false);
+    setMsgStateEdit(false);
+    };
     
     return (
         <> 
+            {msgStateCompleted &&
+                <Snackbar open={msgStateCompleted} autoHideDuration={2000} onClose={handleClose}>
+                    <Alert
+                    onClose={handleClose}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                    >
+                    Задача выполнена.
+                    </Alert>
+                </Snackbar>
+            }
+            {msgStateEdit &&
+                <Snackbar open={msgStateEdit} autoHideDuration={2000} onClose={handleClose}>
+                    <Alert
+                    onClose={handleClose}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                    >
+                    Имя задачи изменено.
+                    </Alert>
+                </Snackbar>
+            }
             <ButtonSort>
                 <IconButton onClick={() => handleSortToggle()}>
                     <SwapVertIconCustom />
@@ -84,8 +128,10 @@ const TodoList: React.FC<TodoListProps> = ({tasks, setTasks, onDelete, onEdit}) 
                     <ListItem key={index}>
                         <ListItemIcon>
                         <Checkbox
-                            onChange={() => handleToggleCheckbox(index)}
-                            checked={task.checkbox}
+                            onChange={() => {
+                                handleToggleCheckbox(task.id)
+                            }}
+                            checked={task.completed}
                             size='medium'
                             edge="start"
                             tabIndex={-1}
@@ -98,11 +144,11 @@ const TodoList: React.FC<TodoListProps> = ({tasks, setTasks, onDelete, onEdit}) 
                             }}
                         />
                         </ListItemIcon>
-                        <ListItemText primary={task.text} secondary={task.date.toLocaleString()}/>
-                        <IconButton edge='end' aria-label="edit" size="large" onClick={() => handleDialogOpen(task.text, index)}>
+                        <ListItemText primary={task.text} secondary={task.createdAt.toLocaleString()}/>
+                        <IconButton edge='end' aria-label="edit" size="large" onClick={() => handleDialogOpen(task.text, task.id)}>
                             <EditIconCustom />
                         </IconButton>
-                        <IconButton edge='end' aria-label="delete" size="large" onClick={() => onDelete(index)}>
+                        <IconButton edge='end' aria-label="delete" size="large" onClick={() => onDelete(task.id)}>
                             <DeleteIconCustom />
                         </IconButton>
                     </ListItem>

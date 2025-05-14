@@ -1,13 +1,17 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ThemeProviderContext } from './components/Themes/ThemeContext';
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
 import './index.css'
 import App from './App'
-import { ThemeProviderContext } from './components/Themes/ThemeContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProviderContext>
-        <App />
-    </ThemeProviderContext>
+    <Provider store={store}>
+      <ThemeProviderContext>
+          <App />
+      </ThemeProviderContext>
+    </Provider>
   </StrictMode>,
 )

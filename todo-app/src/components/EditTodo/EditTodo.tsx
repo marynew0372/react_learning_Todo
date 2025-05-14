@@ -29,7 +29,6 @@ const EditTodo: React.FC<EditTodoProps> = ({open, task, onClose, onSave}) => {
             <DialogTitle>Редактировать задачу</DialogTitle>
             <DialogContent>
                 <TextField
-                // value={editedTask}
                 label='Название задачи'
                 variant='standard'
                 onChange={(elem) => setEditedTask(elem.target.value)}
