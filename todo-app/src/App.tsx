@@ -11,9 +11,11 @@ import Alert from '@mui/material/Alert';
 import ContrastOutlinedIcon from '@mui/icons-material/ContrastOutlined';
 import { PaginationTodo } from './components/Pagination/Pagination';
 import { fetchTodos, createTodo, deleteTodo, updateTodo } from "./api/todos";
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch } from '../store/hooks';
 import { addTask, deleteTask, setTasks, updateTask } from '../store/tasksSlice';
+import { fetchTasks } from './../store/tasksThunks';
 import './App.css'
+import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 
     export interface TaskDate {
@@ -24,11 +26,11 @@ import { RootState } from "../store/store";
     }
 
 const App = () => {
-    const dispatch = useDispatch();
-    const tasks = useSelector((state: RootState) => state.tasks.tasks);
+    const dispatch = useAppDispatch();
 
     const { themeMode, toggleTheme } = useThemeContext();
     const theme = themeMode === 'light' ? lightTheme : darkTheme;
+    const tasks = useSelector((state: RootState) => state.tasks.tasks)
 
     const [msgStateDelete, setMsgStateDelete] = useState<boolean>(false);
     const [errorMsgStateDelete, setErrorMsgStateDelete] = useState<boolean>(false);
@@ -38,20 +40,10 @@ const App = () => {
         console.log('Tasks:', tasks); 
     }, [tasks]);
 
-    // Получаем сохраненные задачи
+    // Получаем сохраненные задачи с помощью thunk
     useEffect(() => {
-        const loadTodos = async () => {
-            try {
-                const data = await fetchTodos(1,10);
-                dispatch(setTasks(data.data));
-            } catch (error) {
-                console.error('Ошибка при загрузке задач:', error);
-                setErrorMsgStateDelete(true);
-            }
-        };
-
-        loadTodos();
-    }, [dispatch]);
+        dispatch(fetchTasks());
+    }, [dispatch])
 
     const handleAddTask = async (taskText: string) => {
         try {

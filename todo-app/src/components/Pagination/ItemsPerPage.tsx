@@ -8,7 +8,33 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { useDispatch, useSelector } from 'react-redux';
 import { saveLimit } from '../../../store/limitSlice';
 import { RootState } from '../../../store/store';
+import styled from 'styled-components';
 
+const FormControlCustomStyles = styled.div`
+  & .MuiFormControl-root {
+      margin: 10px 0;
+
+    & .MuiFormLabel-root {
+      color: ${({ theme }) => theme.text};
+    }
+
+    & .MuiInputBase-root {
+      color: ${({ theme }) => theme.text};
+    }
+
+      & .MuiSvgIcon-root {
+        color: ${({ theme }) => theme.text};
+      }
+
+      & .MuiOutlinedInput-notchedOutline {
+        border-color: ${({ theme }) => theme.borderInput};
+
+        & .MuiOutlinedInput-notchedOutline:hover {
+          border-color: ${({ theme }) => theme.InputborderColorHover}
+        }
+      }
+  }
+`
 
 export default function ItemsPerPage() {
   const dispatch = useDispatch();
@@ -21,6 +47,7 @@ export default function ItemsPerPage() {
   }
 
   return (
+    <FormControlCustomStyles>
      <FormControl sx={{ m: 1, width: 100}}>
         <InputLabel id="demo-multiple-name-label">Кол-во</InputLabel>
         <Select
@@ -35,5 +62,6 @@ export default function ItemsPerPage() {
             <MenuItem value={20}>20</MenuItem>
         </Select>
       </FormControl>
+    </FormControlCustomStyles>
   );
 }

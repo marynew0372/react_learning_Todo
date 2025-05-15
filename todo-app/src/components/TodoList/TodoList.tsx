@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setTasks, updateTask } from '../../../store/tasksSlice';
 import { RootState } from '../../../store/store';
 import { toggleTask } from '../../api/todos';
+import { format } from 'date-fns';
 import './styles.css'
 
 
@@ -56,15 +57,18 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
 
     const handleSortToggle = () => {
         setAscending(!ascending);
-        sortTasksByDate(!ascending);
+        sortTasksByDate(ascending);
     };
 
     const sortTasksByDate = (ascending: boolean = true) => {
         const sortedTasks = [...tasks].sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
             return ascending
-                ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                : new Date(b.createdAt).getTime() - new Date (a.createdAt).getTime();
+                ? dateA.getTime() - dateB.getTime()
+                : dateB.getTime() - dateA.getTime();
         });
+        console.log(sortedTasks);
         dispatch(setTasks(sortedTasks));
     };
 
@@ -144,7 +148,7 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
                             }}
                         />
                         </ListItemIcon>
-                        <ListItemText primary={task.text} secondary={task.createdAt.toLocaleString()}/>
+                        <ListItemText primary={task.text} secondary={format(new Date(task.createdAt), 'dd.MM.yyyy, HH:mm')}/>
                         <IconButton edge='end' aria-label="edit" size="large" onClick={() => handleDialogOpen(task.text, task.id)}>
                             <EditIconCustom />
                         </IconButton>

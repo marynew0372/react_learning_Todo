@@ -9,10 +9,14 @@ export interface Task {
 
 interface TaskState {
     tasks: Task[];
+    loading: boolean;
+    error: string | null;
 };
 
 const initialState: TaskState = {
     tasks: [],
+    loading: false,
+    error: null,
 };
 
 const tasksSlice = createSlice({
@@ -34,8 +38,12 @@ const tasksSlice = createSlice({
                 state.tasks[index] = action.payload;
             }
         },
+        fetchTasksStart(state) {
+            state.loading = true;
+            state.error = null;
+        }
     },
 });
 
-export const { setTasks, addTask, deleteTask, updateTask } = tasksSlice.actions;
+export const { setTasks, addTask, deleteTask, updateTask, fetchTasksStart } = tasksSlice.actions;
 export default tasksSlice.reducer;

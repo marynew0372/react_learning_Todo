@@ -56,7 +56,7 @@ app.post('/todos', (req, res) => {
     id: Date.now(),
     text,
     completed: false,
-    createdAt: new Date().toLocaleString()
+    createdAt: new Date().toISOString(),
   };
   
   todos.unshift(newTodo);
