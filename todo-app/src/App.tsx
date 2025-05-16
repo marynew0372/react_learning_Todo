@@ -36,9 +36,9 @@ const App = () => {
     const [errorMsgStateDelete, setErrorMsgStateDelete] = useState<boolean>(false);
 
     // Вывод массива tasks в консоль
-    useEffect(() => {
-        console.log('Tasks:', tasks); 
-    }, [tasks]);
+    // useEffect(() => {
+    //     console.log('Tasks:', tasks); 
+    // }, [tasks]);
 
     // Получаем сохраненные задачи с помощью thunk
     useEffect(() => {
