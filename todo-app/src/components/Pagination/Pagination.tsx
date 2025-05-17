@@ -5,36 +5,27 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { PaginationStyles } from './Pagination.styles';
 import ItemsPerPage from './ItemsPerPage';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { savePage } from '../../../store/pageSlice';
-import { setTasks } from '../../../store/tasksSlice';
-import { fetchTodos } from '../../api/todos';
+import { fetchTaskThunk, fetchTotalValueTaskThunk } from '../../../store/tasksThunks';
+import { useAppDispatch } from '../../../store/hooks';
 
 
 export function PaginationTodo () {
   const page = useSelector((state: RootState) => state.page.page)
   const limit = useSelector((state: RootState) => state.limit.limit)
-  const dispatch = useDispatch();
-  
-  
-  const [totalTasks, setTotalTasks] = useState(0);
-
-  const totalPages = Math.ceil(totalTasks / limit);
+  const total = useSelector((state: RootState) => state.total.total)
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-        const loadTodos = async () => {
-            try {
-                const data = await fetchTodos(page, limit);
-                dispatch(setTasks(data.data));
-                setTotalTasks(data.total)
-            } catch (error) {
-                console.error('Ошибка при загрузке задач:', error);
-            }
-        };
-        loadTodos();
-    }, [page, limit, dispatch]);
+    dispatch(fetchTaskThunk({page, limit}))
+    dispatch(fetchTotalValueTaskThunk({page, limit}))
+    console.log('Тотал',total)
+  }, [page, limit, dispatch, total]);
+
+    const totalPages = Math.ceil(total / limit);
 
     const handlePageChange = (_event: React.ChangeEvent<unknown>, newPage: number) => {
         dispatch(savePage(newPage)); 

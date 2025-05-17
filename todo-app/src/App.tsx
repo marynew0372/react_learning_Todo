@@ -10,13 +10,9 @@ import Snackbar, { SnackbarCloseReason } from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import ContrastOutlinedIcon from '@mui/icons-material/ContrastOutlined';
 import { PaginationTodo } from './components/Pagination/Pagination';
-import { fetchTodos, createTodo, deleteTodo, updateTodo } from "./api/todos";
 import { useAppDispatch } from '../store/hooks';
-import { addTask, deleteTask, setTasks, updateTask } from '../store/tasksSlice';
-import { fetchTasks } from './../store/tasksThunks';
+import { fetchTaskThunk, addTaskThunk, deleteTaskThunk, editTaskThunk } from './../store/tasksThunks';
 import './App.css'
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
 
     export interface TaskDate {
         id: number;
@@ -30,52 +26,28 @@ const App = () => {
 
     const { themeMode, toggleTheme } = useThemeContext();
     const theme = themeMode === 'light' ? lightTheme : darkTheme;
-    const tasks = useSelector((state: RootState) => state.tasks.tasks)
 
     const [msgStateDelete, setMsgStateDelete] = useState<boolean>(false);
     const [errorMsgStateDelete, setErrorMsgStateDelete] = useState<boolean>(false);
 
-    // Вывод массива tasks в консоль
-    // useEffect(() => {
-    //     console.log('Tasks:', tasks); 
-    // }, [tasks]);
-
-    // Получаем сохраненные задачи с помощью thunk
     useEffect(() => {
-        dispatch(fetchTasks());
+        dispatch(fetchTaskThunk({page: 1, limit: 10}));
     }, [dispatch])
 
     const handleAddTask = async (taskText: string) => {
-        try {
-            const newTask = await createTodo(taskText);
-            dispatch(addTask(newTask));
-        } catch (error) {
-            console.error('Ошибка при добавлении задачи:', error);
-            setErrorMsgStateDelete(true);
-        }
+        dispatch(addTaskThunk({taskText}));
+        setErrorMsgStateDelete(true);
     };
 
     const handleDeleteTask = async (id: number) => {
-        try {
-            await deleteTodo(id);
-            dispatch(deleteTask(id));
-            setMsgStateDelete(true);
-        } catch (error) {
-            console.error('Ошибка при удалении задачи:', error);
-            setErrorMsgStateDelete(true);
-        }
+        dispatch(deleteTaskThunk({id}));
+        setMsgStateDelete(true);
+        setErrorMsgStateDelete(true);
     };
 
     const handleEditTask = async (id: number, newText: string) => {
-        try {
-            const updatedTask = await updateTodo(id, {text: newText});
-            dispatch(updateTask(updatedTask));
-            const data = await fetchTodos(1, 10);
-            dispatch(setTasks(data.data)); 
-        } catch (error) {
-            console.error('Ошибка при изменении задачи', error)
-            setErrorMsgStateDelete(true);
-        }
+        dispatch(editTaskThunk({id, newText}))
+        setErrorMsgStateDelete(true);
     };
 
     const handleClose = (

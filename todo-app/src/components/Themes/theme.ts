@@ -12,7 +12,7 @@ export const lightTheme = {
   export const darkTheme = {
     background: '#121212',
     text: '#fff',
-    borderInput: "#666666",
+    borderInput: "#fff",
     applyStyles: () => '',
     InputborderColorHover: '#fff',
     InputborderColorFocus: '#1976d2',

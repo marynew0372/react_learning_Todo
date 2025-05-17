@@ -38,7 +38,7 @@ app.get('/todos', (req, res) => {
   
   res.json({
     data: paginatedTodos,
-    total: todos.length,
+    total: parseInt(todos.length),
     page: parseInt(page),
     limit: parseInt(limit),
     totalPages: Math.ceil(todos.length / limit)

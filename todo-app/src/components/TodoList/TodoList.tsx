@@ -36,6 +36,10 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     const dispatch = useDispatch();
     const tasks = useSelector((state: RootState) => state.tasks.tasks);
 
+    React.useEffect(() => {
+        console.log(tasks);
+    }, [tasks])
+
     const handleDialogOpen = (task: string, index: number) => {
         setCurrentTask(task);
         setCurrentIndex(index);
