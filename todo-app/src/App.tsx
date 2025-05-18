@@ -14,12 +14,12 @@ import { useAppDispatch } from '../store/hooks';
 import { fetchTaskThunk, addTaskThunk, deleteTaskThunk, editTaskThunk } from './../store/tasksThunks';
 import './App.css'
 
-    export interface TaskDate {
-        id: number;
-        text: string;
-        createdAt: Date;
-        completed: boolean;
-    }
+export interface TaskDate {
+    id: number;
+    text: string;
+    createdAt: Date;
+    completed: boolean;
+}
 
 const App = () => {
     const dispatch = useAppDispatch();
@@ -32,21 +32,23 @@ const App = () => {
 
     useEffect(() => {
         dispatch(fetchTaskThunk({page: 1, limit: 10}));
-    }, [dispatch])
+    }, [dispatch]);
 
-    const handleAddTask = async (taskText: string) => {
+    const handleAddTask = (taskText: string) => {
         dispatch(addTaskThunk({taskText}));
-        setErrorMsgStateDelete(true);
     };
 
-    const handleDeleteTask = async (id: number) => {
-        dispatch(deleteTaskThunk({id}));
-        setMsgStateDelete(true);
-        setErrorMsgStateDelete(true);
+    const handleDeleteTask = (id: number) => {
+        try {
+            dispatch(deleteTaskThunk({id}));
+            setMsgStateDelete(true);
+        } catch {
+            setErrorMsgStateDelete(true);
+        }
     };
 
-    const handleEditTask = async (id: number, newText: string) => {
-        dispatch(editTaskThunk({id, newText}))
+    const handleEditTask = (id: number, newText: string) => {
+        dispatch(editTaskThunk({id, newText}));
         setErrorMsgStateDelete(true);
     };
 
@@ -63,8 +65,8 @@ const App = () => {
 
     return (
         <>
-            {msgStateDelete 
-                ?   <Snackbar open={msgStateDelete} autoHideDuration={2000} onClose={handleClose}>
+            {msgStateDelete && (
+                <Snackbar open={msgStateDelete} autoHideDuration={2000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="success"
@@ -73,8 +75,10 @@ const App = () => {
                     >
                     Задача успешно удалена.
                     </Alert>
-                    </Snackbar>
-                :   <Snackbar open={errorMsgStateDelete} autoHideDuration={3000} onClose={handleClose}>
+                </Snackbar>
+            )}
+            {errorMsgStateDelete && (
+                <Snackbar open={errorMsgStateDelete} autoHideDuration={3000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="error"
@@ -83,8 +87,8 @@ const App = () => {
                     >
                     Сервер недоступен.
                     </Alert>
-                    </Snackbar>
-            }
+                </Snackbar>
+            )}
             <ThemeProvider theme={theme}>
                 <GlobalStyle />
                 <IconButton onClick={toggleTheme} color="primary">

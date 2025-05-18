@@ -45,8 +45,7 @@ export const addTaskThunk = createAsyncThunk<
             const newTask = await createTodo(taskText);
             return newTask;
         } catch (error) {
-            console.error ('Эта ошибка из санка addTaskThunk', error);
-            // return thunkAPI.rejectWithValue('Не удалось загрузить задачи');
+            console.error (error);
         }
     }
 )

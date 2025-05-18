@@ -22,7 +22,6 @@ export function PaginationTodo () {
   useEffect(() => {
     dispatch(fetchTaskThunk({page, limit}))
     dispatch(fetchTotalValueTaskThunk({page, limit}))
-    console.log('Тотал',total)
   }, [page, limit, dispatch, total]);
 
     const totalPages = Math.ceil(total / limit);
