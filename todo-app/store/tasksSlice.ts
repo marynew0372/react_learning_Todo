@@ -53,8 +53,8 @@ const tasksSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        //FETCH TASKS
         builder
+        //FETCH TASKS
         .addCase(fetchTaskThunk.fulfilled, (state, action) => {
             state.tasks = action.payload;
             state.errorLoadTasks = undefined;
@@ -63,7 +63,6 @@ const tasksSlice = createSlice({
             state.errorLoadTasks = action.payload;
         })
         //CREATE TASK
-        builder
         .addCase(addTaskThunk.fulfilled, (state, action) => {
             state.tasks.unshift(action.payload);
             state.errorCreateTask = undefined;
@@ -72,7 +71,6 @@ const tasksSlice = createSlice({
             state.errorCreateTask = action.payload;
         })
         //DELETE TASK
-        builder
         .addCase(deleteTaskThunk.fulfilled, (state, action) => {
             state.tasks = state.tasks.filter((task) => task.id !== action.payload);
             state.errorDeleteTask = false;
@@ -83,7 +81,6 @@ const tasksSlice = createSlice({
             state.successDeleteTask = false;
         })
         //EDIT TASK
-        builder
         .addCase(editTaskThunk.fulfilled, (state, action) => {
             state.sucessEditTask = true;
             const index = state.tasks.findIndex((task) => task.id === action.payload.id);
@@ -92,7 +89,6 @@ const tasksSlice = createSlice({
             }
         })
         //TOGGLE TASK
-        builder
         .addCase(ToggleCompletedThunk.fulfilled, (state, action) => { 
             const task = state.tasks.find(t => t.id === action.payload.id);
             if (task && task.completed === false) {
