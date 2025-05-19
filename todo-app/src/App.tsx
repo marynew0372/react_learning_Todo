@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import AddTodo from './components/AddTodo/AddTodo'
 import TodoList from './components/TodoList/TodoList';
 import { ThemeProvider } from 'styled-components';
@@ -13,6 +13,9 @@ import { PaginationTodo } from './components/Pagination/Pagination';
 import { useAppDispatch } from '../store/hooks';
 import { fetchTaskThunk, addTaskThunk, deleteTaskThunk, editTaskThunk } from './../store/tasksThunks';
 import './App.css'
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { clearDeleteErrorAlert } from "../store/tasksSlice";
 
 export interface TaskDate {
     id: number;
@@ -25,31 +28,25 @@ const App = () => {
     const dispatch = useAppDispatch();
 
     const { themeMode, toggleTheme } = useThemeContext();
-    const theme = themeMode === 'light' ? lightTheme : darkTheme;
+    const theme = themeMode === 'light' ? lightTheme : darkTheme
 
-    const [msgStateDelete, setMsgStateDelete] = useState<boolean>(false);
-    const [errorMsgStateDelete, setErrorMsgStateDelete] = useState<boolean>(false);
-
+    const successDeleteTask = useSelector((state: RootState) => state.tasks.successDeleteTask);
+    const errorDeleteTask = useSelector((state: RootState) => state.tasks.errorDeleteTask);
+    
     useEffect(() => {
         dispatch(fetchTaskThunk({page: 1, limit: 10}));
     }, [dispatch]);
-
+    
     const handleAddTask = (taskText: string) => {
         dispatch(addTaskThunk({taskText}));
     };
-
+    
     const handleDeleteTask = (id: number) => {
-        try {
-            dispatch(deleteTaskThunk({id}));
-            setMsgStateDelete(true);
-        } catch {
-            setErrorMsgStateDelete(true);
-        }
+        dispatch(deleteTaskThunk({id}));
     };
 
     const handleEditTask = (id: number, newText: string) => {
         dispatch(editTaskThunk({id, newText}));
-        setErrorMsgStateDelete(true);
     };
 
     const handleClose = (
@@ -59,14 +56,13 @@ const App = () => {
         if (reason === 'clickaway') {
           return;
         };
-        setMsgStateDelete(false);
-        setErrorMsgStateDelete(false);
+        dispatch(clearDeleteErrorAlert());
         };
 
     return (
         <>
-            {msgStateDelete && (
-                <Snackbar open={msgStateDelete} autoHideDuration={2000} onClose={handleClose}>
+            {successDeleteTask && (
+                <Snackbar open={successDeleteTask} autoHideDuration={2000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="success"
@@ -77,15 +73,15 @@ const App = () => {
                     </Alert>
                 </Snackbar>
             )}
-            {errorMsgStateDelete && (
-                <Snackbar open={errorMsgStateDelete} autoHideDuration={3000} onClose={handleClose}>
+            {errorDeleteTask && (
+                <Snackbar open={errorDeleteTask} autoHideDuration={3000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="error"
                     variant="filled"
                     sx={{ width: '100%' }}
                     >
-                    Сервер недоступен.
+                    Возникла ошибка при удалении задачи.
                     </Alert>
                 </Snackbar>
             )}

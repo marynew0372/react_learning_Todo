@@ -1,8 +1,6 @@
-import { createTodo, deleteTodo, fetchTodos, updateTodo } from '../src/api/todos';
+import { createTodo, deleteTodo, fetchTodos, toggleTask, updateTodo } from '../src/api/todos';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Task } from './tasksSlice';
-
-
 
 
 export const fetchTotalValueTaskThunk = createAsyncThunk(
@@ -40,24 +38,28 @@ export const addTaskThunk = createAsyncThunk<
     { rejectValue: string }
 >(
     'tasks/addTask',
-    async ({taskText}) => {
+    async ({taskText}, thunkAPI) => {
         try {
             const newTask = await createTodo(taskText);
             return newTask;
         } catch (error) {
-            console.error (error);
+            return thunkAPI.rejectWithValue('ошибка');
         }
     }
 )
 
-export const deleteTaskThunk = createAsyncThunk(
+export const deleteTaskThunk = createAsyncThunk<
+    number,
+    { id: number },
+    { rejectValue: boolean }
+>(
     'tasks/deleteTask',
-    async ({id}: {id: number}) => {
+    async ({id}, thunkAPI) => {
         try {
             await deleteTodo(id);
             return id;
         } catch (error) {
-            console.error(error);
+            return thunkAPI.rejectWithValue(true);
         }
     }
 )
@@ -67,5 +69,17 @@ export const editTaskThunk = createAsyncThunk(
     async ({id, newText}: {id: number, newText: string}) => {
         const updatedTask = await updateTodo(id, {text: newText});
         return updatedTask;
+    }
+)
+
+export const ToggleCompletedThunk = createAsyncThunk(
+    'tasks/toggleCompleted',
+    async ({id}: {id: number}, thunkAPI) => {
+        try {
+            const updatedTask = await toggleTask(id);
+            return updatedTask
+        } catch (error) {
+            return thunkAPI.rejectWithValue('Ошибка при изменении статуса задачи');
+        }
     }
 )

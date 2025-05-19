@@ -12,12 +12,14 @@ import Alert from '@mui/material/Alert';
 import EditTodo from '../EditTodo/EditTodo';
 import { ListContainer, ButtonSort } from './TodoList.styles';
 import { EditIconCustom, DeleteIconCustom, SwapVertIconCustom } from './TodoList.styles';
-import { useDispatch, useSelector } from 'react-redux';
-import { setTasks, updateTask } from '../../../store/tasksSlice';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../store/hooks';
+import { clearEditAlert, clearToggleCompletedTaskAlert, setTasks } from '../../../store/tasksSlice';
 import { RootState } from '../../../store/store';
-import { toggleTask } from '../../api/todos';
+// import { toggleTask } from '../../api/todos';
 import { format } from 'date-fns';
 import './styles.css'
+import { ToggleCompletedThunk } from '../../../store/tasksThunks';
 
 
 interface TodoListProps {
@@ -30,10 +32,11 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     const [currentTask, setCurrentTask] = useState<string>('');
     const [currentIndex, setCurrentIndex] = useState<number | null>(null);
     const [ascending, setAscending] = useState(true);
-    const [msgStateCompleted, setMsgStateCompleted] = useState<boolean>(false);
-    const [msgStateEdit, setMsgStateEdit] = useState<boolean>(false);
 
-    const dispatch = useDispatch();
+    const sucessEditTask = useSelector((state: RootState) => state.tasks.sucessEditTask)
+    const successToggleCompletedTask = useSelector((state: RootState) => state.tasks.successToggleCompletedTask);
+
+    const dispatch = useAppDispatch();
     const tasks = useSelector((state: RootState) => state.tasks.tasks);
 
     const handleDialogOpen = (task: string, index: number) => {
@@ -51,7 +54,6 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     const handleSaveTask = (newTask: string) => {
         if (currentIndex !== null) {
             onEdit(currentIndex, newTask);
-            setMsgStateEdit(true);
         }
     }
 
@@ -72,12 +74,7 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     };
 
     const handleToggleCheckbox = async (id: number) => {
-        const updatedTask = await toggleTask(id);
-        const task = tasks.find(t => t.id === id);
-        if (task && task.completed === false) {
-            setMsgStateCompleted(true);
-        }
-        dispatch(updateTask(updatedTask));
+        dispatch(ToggleCompletedThunk({id}))
     }
 
     const handleClose = (
@@ -87,14 +84,14 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
     if (reason === 'clickaway') {
       return;
     };
-    setMsgStateCompleted(false);
-    setMsgStateEdit(false);
+    dispatch(clearToggleCompletedTaskAlert());
+    dispatch(clearEditAlert());
     };
     
     return (
         <> 
-            {msgStateCompleted &&
-                <Snackbar open={msgStateCompleted} autoHideDuration={2000} onClose={handleClose}>
+            {successToggleCompletedTask &&
+                <Snackbar open={successToggleCompletedTask} autoHideDuration={2000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="success"
@@ -105,8 +102,8 @@ const TodoList: React.FC<TodoListProps> = ({onDelete, onEdit}) => {
                     </Alert>
                 </Snackbar>
             }
-            {msgStateEdit &&
-                <Snackbar open={msgStateEdit} autoHideDuration={2000} onClose={handleClose}>
+            {sucessEditTask &&
+                <Snackbar open={sucessEditTask} autoHideDuration={2000} onClose={handleClose}>
                     <Alert
                     onClose={handleClose}
                     severity="success"

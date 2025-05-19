@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { addTaskThunk, deleteTaskThunk, editTaskThunk, fetchTaskThunk } from './tasksThunks';
+import { addTaskThunk, deleteTaskThunk, editTaskThunk, fetchTaskThunk, ToggleCompletedThunk } from './tasksThunks';
 
 export interface Task {
     id: number;
@@ -10,14 +10,22 @@ export interface Task {
 
 interface TaskState {
     tasks: Task[];
-    loading: boolean;
-    error: string | undefined;
+    errorLoadTasks: string | undefined;
+    errorCreateTask: string | undefined;
+    errorDeleteTask: boolean | undefined,
+    successDeleteTask: boolean | undefined,
+    sucessEditTask: boolean | undefined;
+    successToggleCompletedTask: boolean | undefined;
 };
 
 const initialState: TaskState = {
     tasks: [],
-    loading: false,
-    error: 'null',
+    errorLoadTasks: undefined,
+    errorCreateTask: undefined,
+    errorDeleteTask: false,
+    successDeleteTask: false,
+    sucessEditTask: false,
+    successToggleCompletedTask: false,
 };
 
 const tasksSlice = createSlice({
@@ -33,39 +41,63 @@ const tasksSlice = createSlice({
         deleteTask(state, action: PayloadAction<number>) {
             state.tasks = state.tasks.filter((task) => task.id !== action.payload);
         },
-        updateTask(state, action: PayloadAction<Task>) {
-            const index = state.tasks.findIndex((task) => task.id === action.payload.id);
-            if (index !== -1) {
-                state.tasks[index] = action.payload;
-            }
+        clearDeleteErrorAlert(state) {
+            state.errorDeleteTask = false;
+            state.successDeleteTask = false;
         },
-        fetchTasksStart(state) {
-            state.loading = true;
-            state.error = undefined;
-        }
+        clearEditAlert(state) {
+            state.sucessEditTask = false;
+        },
+        clearToggleCompletedTaskAlert(state) {
+            state.successToggleCompletedTask = false;
+        },
     },
     extraReducers: (builder) => {
         //FETCH TASKS
         builder
         .addCase(fetchTaskThunk.fulfilled, (state, action) => {
             state.tasks = action.payload;
-            state.loading = false;
+            state.errorLoadTasks = undefined;
         })
         .addCase(fetchTaskThunk.rejected, (state, action) => {
-            state.error = action.payload;
-            state.loading = false;
+            state.errorLoadTasks = action.payload;
         })
         //CREATE TASK
         builder
         .addCase(addTaskThunk.fulfilled, (state, action) => {
             state.tasks.unshift(action.payload);
+            state.errorCreateTask = undefined;
+        })
+        .addCase(addTaskThunk.rejected, (state, action) => {
+            state.errorCreateTask = action.payload;
         })
         //DELETE TASK
+        builder
         .addCase(deleteTaskThunk.fulfilled, (state, action) => {
             state.tasks = state.tasks.filter((task) => task.id !== action.payload);
+            state.errorDeleteTask = false;
+            state.successDeleteTask = true;
+        })
+        .addCase(deleteTaskThunk.rejected, (state, action) => {
+            state.errorDeleteTask = action.payload;
+            state.successDeleteTask = false;
         })
         //EDIT TASK
+        builder
         .addCase(editTaskThunk.fulfilled, (state, action) => {
+            state.sucessEditTask = true;
+            const index = state.tasks.findIndex((task) => task.id === action.payload.id);
+            if (index !== -1) {
+                state.tasks[index] = action.payload;
+            }
+        })
+        //TOGGLE TASK
+        builder
+        .addCase(ToggleCompletedThunk.fulfilled, (state, action) => { 
+            const task = state.tasks.find(t => t.id === action.payload.id);
+            if (task && task.completed === false) {
+                state.successToggleCompletedTask = true;
+            }
             const index = state.tasks.findIndex((task) => task.id === action.payload.id);
             if (index !== -1) {
                 state.tasks[index] = action.payload;
@@ -74,5 +106,5 @@ const tasksSlice = createSlice({
     }
 });
 
-export const { setTasks, addTask, deleteTask, updateTask, fetchTasksStart } = tasksSlice.actions;
+export const { setTasks, addTask, deleteTask, clearDeleteErrorAlert, clearEditAlert, clearToggleCompletedTaskAlert } = tasksSlice.actions;
 export default tasksSlice.reducer;
